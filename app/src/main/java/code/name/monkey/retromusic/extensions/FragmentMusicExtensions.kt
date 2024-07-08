@@ -14,8 +14,8 @@ fun getSongInfo(song: Song): String {
         return try {
             val audioHeader = AudioFileIO.read(File(song.data)).audioHeader
             val string: StringBuilder = StringBuilder()
-            val uriFile = file.toUri()
-            string.append(getMimeType(uriFile.toString())).append(" • ")
+            string.append(audioHeader.format).append(" • ")
+            string.append(audioHeader.channels).append(" • ")
             string.append(audioHeader.bitRate).append(" kb/s").append(" • ")
             string.append(RetroUtil.frequencyCount(audioHeader.sampleRate.toInt()))
                 .append(" kHz")
