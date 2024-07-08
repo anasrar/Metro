@@ -1,0 +1,40 @@
+name: Build
+on:
+  workflow_dispatch:
+
+jobs:
+  build-release:
+    name: Build
+    permissions:
+      contents: write
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Setup keystore
+        env:
+          KEYSTORE_BASE: ${{ secrets.KEYSTORE_BASE }}
+        run: |
+          echo "$KEYSTORE_BASE" | base64 -d > sign.keystore
+
+      - name: Build
+        env:
+          KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+        run: |
+          chmod +x gradlew
+          KEYSTORE_PATH="$PWD/sign.keystore" ./gradlew --no-daemon assembleRelease
+          mv app/build/outputs/apk/release/app-release.apk release.apk
+
+      - name: Store Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: *.apk
